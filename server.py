@@ -292,8 +292,8 @@ def main():
     threading.Thread(target=saver, daemon=True).start()
     srv = ThreadingHTTPServer(("0.0.0.0", a.port), H)
     srv.daemon_threads = True
-    print(f"inkpad on http://localhost:{a.port}  (iPad: http://<tailscale-ip>:{a.port} via tailscale, "
-          f"or http://<lan-ip>:{a.port} on home wifi)", flush=True)
+    print(f"inkpad on http://localhost:{a.port} (open it from the ipad via this machine's "
+          f"lan or tailscale address, same port)", flush=True)
     srv.serve_forever()
 
 
