@@ -21,6 +21,8 @@ python3 server.py --port 8765        # local, no slide import unless soffice + p
 ./deploy.sh                          # build + restart the container on alexandria
 ```
 
+licence: MIT.
+
 served at `http://alexandria.local/inkpad/` (nginx proxies `/inkpad/` to port 5155 with
 buffering off for the live stream and `client_max_body_size 150m` for decks). data lives
 in `~/inkpad/data` on alexandria: `notebook.json` plus `img/` for slide images.
