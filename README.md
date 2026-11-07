@@ -8,6 +8,9 @@ the laptop (and anything else that has the page open).
 - **slides**: import a .pptx / .odp / .key / .pdf and it becomes one deck in the
   sidebar; flip slides with the bar at the bottom (or ← →). each slide sits with
   space all round to annotate, and keeps its own writing
+- zoom: pinch with two fingers on the ipad, ctrl + scroll / trackpad pinch or ctrl +/−/0 on
+  the laptop, or the toolbar buttons. per device, so zooming in on the ipad doesn't zoom
+  the screen you share
 - export a page as png
 
 stdlib python server (`server.py`) + one html page (`index.html`). live updates over
