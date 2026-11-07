@@ -28,12 +28,23 @@ def new_page(title="Untitled"):
 def load():
     if os.path.exists(DATA):
         with open(DATA) as f:
-            return json.load(f)
+            return migrate(json.load(f))
     return {"pages": [new_page("Page 1")]}
 
 
+def migrate(book):
+    """Older imports were one loose page per slide ("3 · deckname"): fold them into decks."""
+    for p in book["pages"]:
+        if p.get("img") and not p.get("deck"):
+            p["deck"] = os.path.basename(p["img"]["src"]).split("-")[0]
+            n, _, stem = p["title"].partition(" · ")
+            p["deckTitle"] = stem or p["title"]
+            p["title"] = n if n.isdigit() else p["title"]
+    return book
+
+
 nb = load()
-dirty = False
+dirty = True  # write back once at startup, so any migration sticks
 
 
 def saver():
@@ -91,6 +102,21 @@ def apply(op):
                 os.remove(os.path.join(IMG_DIR, os.path.basename(p["img"]["src"])))
             except OSError:
                 pass
+    elif t == "renamedeck":
+        for q in nb["pages"]:
+            if q.get("deck") == op.get("deck"):
+                q["deckTitle"] = op["title"][:80]
+    elif t == "deldeck":
+        gone = [q for q in nb["pages"] if q.get("deck") == op.get("deck")]
+        nb["pages"] = [q for q in nb["pages"] if q.get("deck") != op.get("deck")]
+        for q in gone:
+            try:
+                os.remove(os.path.join(IMG_DIR, os.path.basename(q["img"]["src"])))
+            except (OSError, KeyError):
+                pass
+        if not nb["pages"]:  # never leave the notebook empty
+            nb["pages"].append(new_page("Page 1"))
+            op["pageObj"] = nb["pages"][0]
     elif t == "goto":
         pass  # "follow me" signal, relay only
     else:
@@ -141,7 +167,8 @@ def import_deck(filename, body):
             name = f"{deck}-{n}.png"
             shutil.move(png, os.path.join(IMG_DIR, name))
             iw, ih = png_size(os.path.join(IMG_DIR, name))
-            pg = new_page(f"{n} · {stem}")
+            pg = new_page(str(n))
+            pg["deck"], pg["deckTitle"] = deck, stem
             pg["bg"] = "blank"
             pg["img"] = {"src": f"img/{name}", "x": SLIDE_X, "y": SLIDE_Y, "w": SLIDE_W,
                          "h": round(SLIDE_W * ih / iw, 1)}
